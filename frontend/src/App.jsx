@@ -62,7 +62,7 @@ function Home() {
   const fetchProducts = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/products"
+        "https://sparkit-e-commerce.onrender.com/api/products"
       );
 
       setProducts(response.data);
