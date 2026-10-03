@@ -3,6 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 
 function Cart() {
   const [cart, setCart] = useState([]);
+  const [isMobile, setIsMobile] = useState(
+    window.innerWidth <= 700
+  );
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,21 +16,30 @@ function Cart() {
     setCart(savedCart);
   }, []);
 
-  const updateQuantity = (id, change) => {
-    const updatedCart = cart
-      .map((item) => {
-        if (item._id === id) {
-          return {
-            ...item,
-            quantity: Math.max(
-              1,
-              item.quantity + change
-            ),
-          };
-        }
+  // Detect mobile screen
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 700);
+    };
 
-        return item;
-      });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const updateQuantity = (id, change) => {
+    const updatedCart = cart.map((item) => {
+      if (item._id === id) {
+        return {
+          ...item,
+          quantity: Math.max(1, item.quantity + change),
+        };
+      }
+
+      return item;
+    });
 
     setCart(updatedCart);
 
@@ -50,14 +63,12 @@ function Cart() {
   };
 
   const totalItems = cart.reduce(
-    (total, item) =>
-      total + item.quantity,
+    (total, item) => total + item.quantity,
     0
   );
 
   const totalPrice = cart.reduce(
-    (total, item) =>
-      total + item.price * item.quantity,
+    (total, item) => total + item.price * item.quantity,
     0
   );
 
@@ -67,68 +78,70 @@ function Cart() {
 
   return (
     <div style={styles.page}>
-
-      {/* Header */}
+      {/* HEADER */}
       <div style={styles.header}>
-        <Link
-          to="/"
-          style={styles.backLink}
-        >
+        <Link to="/" style={styles.backLink}>
           ← Continue Shopping
         </Link>
 
-        <h1 style={styles.title}>
-          Shopping Cart
-        </h1>
+        <h1 style={styles.title}>Shopping Cart</h1>
 
         {cart.length > 0 && (
           <p style={styles.subtitle}>
             {totalItems}{" "}
-            {totalItems === 1
-              ? "item"
-              : "items"}{" "}
-            in your cart
+            {totalItems === 1 ? "item" : "items"} in your cart
           </p>
         )}
       </div>
 
-      {/* Empty Cart */}
+      {/* EMPTY CART */}
       {cart.length === 0 ? (
         <div style={styles.emptyCart}>
-          <div style={styles.emptyIcon}>
-            🛒
-          </div>
+          <div style={styles.emptyIcon}>🛒</div>
 
           <h2 style={styles.emptyTitle}>
             Your cart is empty
           </h2>
 
           <p style={styles.emptyText}>
-            Add some products to your cart
-            to continue shopping.
+            Add some products to your cart to continue
+            shopping.
           </p>
 
-          <Link
-            to="/products"
-            style={styles.shopButton}
-          >
+          <Link to="/products" style={styles.shopButton}>
             Start Shopping
           </Link>
         </div>
       ) : (
-        <div style={styles.container}>
-
-          {/* Cart Items */}
+        <div
+          style={{
+            ...styles.container,
+            ...(isMobile
+              ? styles.mobileContainer
+              : {}),
+          }}
+        >
+          {/* CART ITEMS */}
           <div style={styles.itemsSection}>
-
             {cart.map((item) => (
               <div
                 key={item._id}
-                style={styles.cartItem}
+                style={{
+                  ...styles.cartItem,
+                  ...(isMobile
+                    ? styles.mobileCartItem
+                    : {}),
+                }}
               >
-
-                {/* Product Image */}
-                <div style={styles.imageBox}>
+                {/* IMAGE */}
+                <div
+                  style={{
+                    ...styles.imageBox,
+                    ...(isMobile
+                      ? styles.mobileImageBox
+                      : {}),
+                  }}
+                >
                   <img
                     src={item.image}
                     alt={item.name}
@@ -136,14 +149,20 @@ function Cart() {
                   />
                 </div>
 
-                {/* Product Info */}
+                {/* PRODUCT INFORMATION */}
                 <div style={styles.productInfo}>
-
                   <span style={styles.category}>
                     {item.category}
                   </span>
 
-                  <h2 style={styles.productName}>
+                  <h2
+                    style={{
+                      ...styles.productName,
+                      ...(isMobile
+                        ? styles.mobileProductName
+                        : {}),
+                    }}
+                  >
                     {item.name}
                   </h2>
 
@@ -151,21 +170,16 @@ function Cart() {
                     ₹{item.price}
                   </p>
 
-                  {/* Quantity */}
+                  {/* QUANTITY */}
                   <div style={styles.quantityRow}>
-
                     <span style={styles.quantityLabel}>
                       Quantity:
                     </span>
 
                     <div style={styles.quantityControls}>
-
                       <button
                         onClick={() =>
-                          updateQuantity(
-                            item._id,
-                            -1
-                          )
+                          updateQuantity(item._id, -1)
                         }
                         style={styles.quantityButton}
                       >
@@ -178,20 +192,16 @@ function Cart() {
 
                       <button
                         onClick={() =>
-                          updateQuantity(
-                            item._id,
-                            1
-                          )
+                          updateQuantity(item._id, 1)
                         }
                         style={styles.quantityButton}
                       >
                         +
                       </button>
-
                     </div>
                   </div>
 
-                  {/* Remove */}
+                  {/* REMOVE */}
                   <button
                     onClick={() =>
                       removeItem(item._id)
@@ -202,20 +212,30 @@ function Cart() {
                   </button>
                 </div>
 
-                {/* Item Total */}
-                <div style={styles.itemTotal}>
-                  ₹
-                  {item.price *
-                    item.quantity}
+                {/* ITEM TOTAL */}
+                <div
+                  style={{
+                    ...styles.itemTotal,
+                    ...(isMobile
+                      ? styles.mobileItemTotal
+                      : {}),
+                  }}
+                >
+                  ₹{item.price * item.quantity}
                 </div>
-
               </div>
             ))}
           </div>
 
-          {/* Summary */}
-          <div style={styles.summary}>
-
+          {/* ORDER SUMMARY */}
+          <div
+            style={{
+              ...styles.summary,
+              ...(isMobile
+                ? styles.mobileSummary
+                : {}),
+            }}
+          >
             <h2 style={styles.summaryTitle}>
               Order Summary
             </h2>
@@ -227,16 +247,12 @@ function Cart() {
 
             <div style={styles.summaryRow}>
               <span>Subtotal</span>
-              <span>
-                ₹{totalPrice}
-              </span>
+              <span>₹{totalPrice}</span>
             </div>
 
             <div style={styles.summaryRow}>
               <span>Delivery</span>
-              <span style={styles.free}>
-                FREE
-              </span>
+              <span style={styles.free}>FREE</span>
             </div>
 
             <div style={styles.divider} />
@@ -244,7 +260,7 @@ function Cart() {
             <div style={styles.totalRow}>
               <span>Total</span>
 
-              <strong>
+              <strong style={styles.total}>
                 ₹{totalPrice}
               </strong>
             </div>
@@ -262,7 +278,6 @@ function Cart() {
             >
               ← Continue Shopping
             </Link>
-
           </div>
         </div>
       )}
@@ -279,6 +294,7 @@ const styles = {
   },
 
   header: {
+    width: "100%",
     maxWidth: "1200px",
     margin: "0 auto 30px",
   },
@@ -294,6 +310,7 @@ const styles = {
     margin: "18px 0 5px",
     color: "#172033",
     fontSize: "34px",
+    fontWeight: "700",
   },
 
   subtitle: {
@@ -303,22 +320,33 @@ const styles = {
   },
 
   container: {
+    width: "100%",
     maxWidth: "1200px",
     margin: "0 auto",
     display: "grid",
-    gridTemplateColumns:
-      "minmax(0, 1fr) 350px",
+    gridTemplateColumns: "minmax(0, 1fr) 350px",
     gap: "25px",
     alignItems: "start",
+  },
+
+  /* MOBILE CONTAINER */
+  mobileContainer: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    gap: "18px",
   },
 
   itemsSection: {
     display: "flex",
     flexDirection: "column",
     gap: "15px",
+    minWidth: "0",
+    width: "100%",
   },
 
   cartItem: {
+    width: "100%",
     background: "#ffffff",
     borderRadius: "16px",
     padding: "18px",
@@ -332,6 +360,15 @@ const styles = {
     boxSizing: "border-box",
   },
 
+  /* MOBILE CART ITEM */
+  mobileCartItem: {
+    gridTemplateColumns: "80px minmax(0, 1fr)",
+    gap: "12px",
+    padding: "12px",
+    width: "100%",
+    boxSizing: "border-box",
+  },
+
   imageBox: {
     width: "130px",
     height: "130px",
@@ -341,6 +378,12 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+    flexShrink: "0",
+  },
+
+  mobileImageBox: {
+    width: "80px",
+    height: "80px",
   },
 
   image: {
@@ -365,6 +408,14 @@ const styles = {
     color: "#172033",
     fontSize: "19px",
     margin: "7px 0",
+    lineHeight: "1.35",
+  },
+
+  mobileProductName: {
+    fontSize: "16px",
+    lineHeight: "1.3",
+    wordBreak: "break-word",
+    margin: "5px 0",
   },
 
   price: {
@@ -378,6 +429,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "12px",
+    flexWrap: "wrap",
   },
 
   quantityLabel: {
@@ -425,9 +477,22 @@ const styles = {
     fontSize: "18px",
     fontWeight: "700",
     whiteSpace: "nowrap",
+    alignSelf: "start",
+    paddingTop: "5px",
+  },
+
+  /* MOBILE ITEM TOTAL */
+  mobileItemTotal: {
+    gridColumn: "1 / -1",
+    width: "100%",
+    borderTop: "1px solid #e2e8f0",
+    paddingTop: "10px",
+    textAlign: "right",
+    boxSizing: "border-box",
   },
 
   summary: {
+    width: "100%",
     background: "#ffffff",
     borderRadius: "16px",
     padding: "25px",
@@ -436,6 +501,16 @@ const styles = {
     boxSizing: "border-box",
     position: "sticky",
     top: "20px",
+  },
+
+  /* IMPORTANT MOBILE FIX */
+  mobileSummary: {
+    position: "static",
+    width: "100%",
+    margin: "0",
+    padding: "20px",
+    boxSizing: "border-box",
+    order: "2",
   },
 
   summaryTitle: {
@@ -447,6 +522,7 @@ const styles = {
   summaryRow: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: "15px",
     color: "#64748b",
     fontSize: "15px",
@@ -473,13 +549,12 @@ const styles = {
   },
 
   total: {
-    color: "#ef2929",
     fontSize: "24px",
   },
 
   checkoutButton: {
     width: "100%",
-    height: "50px",
+    minHeight: "50px",
     border: "none",
     borderRadius: "10px",
     background:
@@ -488,6 +563,7 @@ const styles = {
     fontSize: "15px",
     fontWeight: "700",
     cursor: "pointer",
+    padding: "0 15px",
   },
 
   continueLink: {
@@ -501,6 +577,7 @@ const styles = {
   },
 
   emptyCart: {
+    width: "100%",
     maxWidth: "600px",
     margin: "70px auto",
     background: "#ffffff",
@@ -509,6 +586,7 @@ const styles = {
     textAlign: "center",
     boxShadow:
       "0 10px 35px rgba(15, 23, 42, 0.08)",
+    boxSizing: "border-box",
   },
 
   emptyIcon: {
