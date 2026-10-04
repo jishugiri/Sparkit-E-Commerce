@@ -3064,3 +3064,116 @@
     font-size: 24px;
   }
 }
+
+/* =========================================
+   CART - RESPONSIVE MOBILE FIX
+========================================= */
+
+@media (max-width: 1000px) {
+  .cart-responsive-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cart-responsive-summary {
+    position: static !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .cart-responsive-page {
+    padding: 25px 12px 50px !important;
+  }
+
+  .cart-responsive-title {
+    font-size: 30px !important;
+  }
+
+  .cart-responsive-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+    width: 100% !important;
+  }
+
+  .cart-responsive-items {
+    width: 100% !important;
+  }
+
+  .cart-responsive-item {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 90px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  .cart-responsive-image-box {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .cart-responsive-product-name {
+    font-size: 16px !important;
+    line-height: 1.3 !important;
+  }
+
+  .cart-responsive-price {
+    font-size: 17px !important;
+  }
+
+  .cart-responsive-item-total {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    text-align: right !important;
+  }
+
+  .cart-responsive-summary {
+    width: 100% !important;
+    position: static !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .cart-responsive-summary-title {
+    font-size: 22px !important;
+  }
+
+  .cart-responsive-checkout {
+    width: 100% !important;
+    min-height: 52px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-responsive-page {
+    padding: 20px 10px 40px !important;
+  }
+
+  .cart-responsive-title {
+    font-size: 27px !important;
+  }
+
+  .cart-responsive-item {
+    grid-template-columns: 80px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 10px !important;
+  }
+
+  .cart-responsive-image-box {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .cart-responsive-summary {
+    padding: 18px !important;
+    border-radius: 14px !important;
+  }
+
+  .cart-responsive-checkout {
+    font-size: 14px !important;
+  }
+}
