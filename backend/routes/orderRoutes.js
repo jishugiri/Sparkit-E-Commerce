@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   try {
     const {
+      userId,
       customer,
       items,
       totalAmount,
@@ -14,6 +15,7 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     if (
+      !userId ||
       !customer ||
       !items ||
       items.length === 0 ||
@@ -25,6 +27,7 @@ router.post("/", async (req, res) => {
     }
 
     const order = await Order.create({
+      userId,
       customer,
       items,
       totalAmount,
@@ -49,7 +52,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 // GET ALL ORDERS
 router.get("/", async (req, res) => {
   try {
@@ -64,6 +66,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET ORDERS BY USER
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const orders = await Order.find({
+      userId: req.params.userId,
+    }).sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    console.error(
+      "Fetch user orders error:",
+      error.message
+    );
+
+    res.status(500).json({
+      message: "Failed to fetch user orders",
+    });
+  }
+});
 
 // GET SINGLE ORDER
 router.get("/:id", async (req, res) => {
@@ -85,6 +106,5 @@ router.get("/:id", async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

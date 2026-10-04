@@ -6,6 +6,7 @@ function Checkout() {
   const navigate = useNavigate();
 
   const [cart, setCart] = useState([]);
+  const [userId, setUserId] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -22,9 +23,7 @@ function Checkout() {
 
   useEffect(() => {
     const savedCart =
-      JSON.parse(
-        localStorage.getItem("sparkitCart")
-      ) || [];
+      JSON.parse(localStorage.getItem("sparkitCart")) || [];
 
     setCart(savedCart);
 
@@ -34,6 +33,8 @@ function Checkout() {
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
+
+        setUserId(user.id || "");
 
         setFormData((previous) => ({
           ...previous,
@@ -81,6 +82,12 @@ function Checkout() {
       return;
     }
 
+    if (!userId) {
+      alert("Please login before placing an order.");
+      navigate("/login");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -93,6 +100,8 @@ function Checkout() {
       }));
 
       const orderData = {
+        userId,
+
         customer: {
           name: formData.name,
           email: formData.email,
@@ -156,9 +165,7 @@ function Checkout() {
     <div className="checkout-page">
 
       {/* HEADER */}
-
       <div className="checkout-header">
-
         <Link
           to="/cart"
           className="checkout-back"
@@ -170,13 +177,10 @@ function Checkout() {
           <span>⚡</span>
           Sparkit
         </div>
-
       </div>
 
       {/* TITLE */}
-
       <div className="checkout-title">
-
         <h1>
           Checkout
         </h1>
@@ -184,7 +188,6 @@ function Checkout() {
         <p>
           Complete your order securely
         </p>
-
       </div>
 
       {cart.length === 0 ? (
@@ -609,6 +612,7 @@ function Checkout() {
           </div>
 
         </form>
+
       )}
 
     </div>
