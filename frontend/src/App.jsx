@@ -23,6 +23,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import MyOrders from "./pages/MyOrders";
 
 import "./App.css";
 
@@ -229,9 +230,7 @@ function Home() {
   return (
     <div className="sparkit-home">
 
-      {/* =========================
-          HEADER
-      ========================= */}
+      {/* HEADER */}
 
       <header className="main-header">
 
@@ -277,6 +276,10 @@ function Home() {
             Products
           </Link>
 
+          <Link to="/my-orders">
+            My Orders
+          </Link>
+
           <Link
             to="/cart"
             className="cart-link"
@@ -312,9 +315,7 @@ function Home() {
 
       </header>
 
-      {/* =========================
-          CATEGORY SECTION
-      ========================= */}
+      {/* CATEGORY SECTION */}
 
       <section className="category-section">
 
@@ -353,9 +354,7 @@ function Home() {
 
       </section>
 
-      {/* =========================
-          NEW COLLECTION BANNER
-      ========================= */}
+      {/* NEW COLLECTION BANNER */}
 
       <section className="new-collection">
 
@@ -393,6 +392,7 @@ function Home() {
               <ArrowRight
                 size={20}
               />
+
             </button>
 
           </div>
@@ -441,9 +441,7 @@ function Home() {
 
       </section>
 
-      {/* =========================
-          FEATURED PRODUCTS
-      ========================= */}
+      {/* FEATURED PRODUCTS */}
 
       <section className="featured-section">
 
@@ -470,6 +468,7 @@ function Home() {
             <ArrowRight
               size={19}
             />
+
           </Link>
 
         </div>
@@ -477,12 +476,6 @@ function Home() {
         <div className="featured-grid">
 
           {filteredProducts.length > 0 ? (
-
-            /*
-              IMPORTANT:
-              No slice(0, 8) here.
-              All products will be displayed.
-            */
 
             filteredProducts.map(
               (product) => (
@@ -570,9 +563,7 @@ function Home() {
 
       </section>
 
-      {/* =========================
-          FOOTER
-      ========================= */}
+      {/* FOOTER */}
 
       <footer className="sparkit-footer">
 
@@ -602,6 +593,10 @@ function Home() {
 
           <Link to="/products">
             Products
+          </Link>
+
+          <Link to="/my-orders">
+            My Orders
           </Link>
 
           <Link to="/cart">
@@ -683,6 +678,11 @@ function App() {
         <Route
           path="/register"
           element={<Register />}
+        />
+
+        <Route
+          path="/my-orders"
+          element={<MyOrders />}
         />
 
       </Routes>
