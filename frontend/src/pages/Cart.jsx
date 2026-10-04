@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Cart() {
+  const navigate = useNavigate();
+
   const [cart, setCart] = useState([]);
   const [isMobile, setIsMobile] = useState(
-    window.innerWidth <= 700
+    window.innerWidth <= 1200
   );
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const savedCart =
@@ -16,11 +16,12 @@ function Cart() {
     setCart(savedCart);
   }, []);
 
-  // Detect mobile screen
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 700);
+      setIsMobile(window.innerWidth <= 1200);
     };
+
+    handleResize();
 
     window.addEventListener("resize", handleResize);
 
@@ -34,7 +35,10 @@ function Cart() {
       if (item._id === id) {
         return {
           ...item,
-          quantity: Math.max(1, item.quantity + change),
+          quantity: Math.max(
+            1,
+            (item.quantity || 1) + change
+          ),
         };
       }
 
@@ -63,12 +67,14 @@ function Cart() {
   };
 
   const totalItems = cart.reduce(
-    (total, item) => total + item.quantity,
+    (total, item) =>
+      total + (item.quantity || 1),
     0
   );
 
   const totalPrice = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) =>
+      total + item.price * (item.quantity || 1),
     0
   );
 
@@ -76,26 +82,17 @@ function Cart() {
     navigate("/checkout");
   };
 
-  return (
-    <div style={styles.page}>
-      {/* HEADER */}
-      <div style={styles.header}>
-        <Link to="/" style={styles.backLink}>
-          ← Continue Shopping
-        </Link>
+  if (cart.length === 0) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.header}>
+          <Link to="/" style={styles.backLink}>
+            ← Continue Shopping
+          </Link>
 
-        <h1 style={styles.title}>Shopping Cart</h1>
+          <h1 style={styles.title}>Shopping Cart</h1>
+        </div>
 
-        {cart.length > 0 && (
-          <p style={styles.subtitle}>
-            {totalItems}{" "}
-            {totalItems === 1 ? "item" : "items"} in your cart
-          </p>
-        )}
-      </div>
-
-      {/* EMPTY CART */}
-      {cart.length === 0 ? (
         <div style={styles.emptyCart}>
           <div style={styles.emptyIcon}>🛒</div>
 
@@ -108,35 +105,70 @@ function Cart() {
             shopping.
           </p>
 
-          <Link to="/products" style={styles.shopButton}>
+          <Link
+            to="/products"
+            style={styles.shopButton}
+          >
             Start Shopping
           </Link>
         </div>
-      ) : (
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.page}>
+      {/* HEADER */}
+      <div style={styles.header}>
+        <Link to="/" style={styles.backLink}>
+          ← Continue Shopping
+        </Link>
+
+        <h1 style={styles.title}>Shopping Cart</h1>
+
+        <p style={styles.subtitle}>
+          {totalItems}{" "}
+          {totalItems === 1 ? "item" : "items"} in your cart
+        </p>
+      </div>
+
+      {/* MAIN CART */}
+      <div
+        style={{
+          ...styles.container,
+
+          ...(isMobile
+            ? styles.mobileContainer
+            : styles.desktopContainer),
+        }}
+      >
+        {/* PRODUCTS */}
         <div
           style={{
-            ...styles.container,
-            ...(isMobile
-              ? styles.mobileContainer
-              : {}),
+            ...styles.itemsSection,
+            width: "100%",
+            minWidth: 0,
           }}
         >
-          {/* CART ITEMS */}
-          <div style={styles.itemsSection}>
-            {cart.map((item) => (
+          {cart.map((item) => {
+            const quantity = item.quantity || 1;
+
+            return (
               <div
                 key={item._id}
                 style={{
                   ...styles.cartItem,
+
                   ...(isMobile
                     ? styles.mobileCartItem
-                    : {}),
+                    : styles.desktopCartItem),
                 }}
               >
                 {/* IMAGE */}
                 <div
                   style={{
                     ...styles.imageBox,
+
                     ...(isMobile
                       ? styles.mobileImageBox
                       : {}),
@@ -149,15 +181,16 @@ function Cart() {
                   />
                 </div>
 
-                {/* PRODUCT INFORMATION */}
+                {/* PRODUCT INFO */}
                 <div style={styles.productInfo}>
-                  <span style={styles.category}>
+                  <div style={styles.category}>
                     {item.category}
-                  </span>
+                  </div>
 
                   <h2
                     style={{
                       ...styles.productName,
+
                       ...(isMobile
                         ? styles.mobileProductName
                         : {}),
@@ -166,11 +199,10 @@ function Cart() {
                     {item.name}
                   </h2>
 
-                  <p style={styles.price}>
+                  <div style={styles.price}>
                     ₹{item.price}
-                  </p>
+                  </div>
 
-                  {/* QUANTITY */}
                   <div style={styles.quantityRow}>
                     <span style={styles.quantityLabel}>
                       Quantity:
@@ -178,8 +210,12 @@ function Cart() {
 
                     <div style={styles.quantityControls}>
                       <button
+                        type="button"
                         onClick={() =>
-                          updateQuantity(item._id, -1)
+                          updateQuantity(
+                            item._id,
+                            -1
+                          )
                         }
                         style={styles.quantityButton}
                       >
@@ -187,12 +223,16 @@ function Cart() {
                       </button>
 
                       <span style={styles.quantity}>
-                        {item.quantity}
+                        {quantity}
                       </span>
 
                       <button
+                        type="button"
                         onClick={() =>
-                          updateQuantity(item._id, 1)
+                          updateQuantity(
+                            item._id,
+                            1
+                          )
                         }
                         style={styles.quantityButton}
                       >
@@ -201,8 +241,8 @@ function Cart() {
                     </div>
                   </div>
 
-                  {/* REMOVE */}
                   <button
+                    type="button"
                     onClick={() =>
                       removeItem(item._id)
                     }
@@ -216,71 +256,77 @@ function Cart() {
                 <div
                   style={{
                     ...styles.itemTotal,
+
                     ...(isMobile
                       ? styles.mobileItemTotal
                       : {}),
                   }}
                 >
-                  ₹{item.price * item.quantity}
+                  ₹{item.price * quantity}
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* ORDER SUMMARY */}
-          <div
-            style={{
-              ...styles.summary,
-              ...(isMobile
-                ? styles.mobileSummary
-                : {}),
-            }}
-          >
-            <h2 style={styles.summaryTitle}>
-              Order Summary
-            </h2>
-
-            <div style={styles.summaryRow}>
-              <span>Items</span>
-              <span>{totalItems}</span>
-            </div>
-
-            <div style={styles.summaryRow}>
-              <span>Subtotal</span>
-              <span>₹{totalPrice}</span>
-            </div>
-
-            <div style={styles.summaryRow}>
-              <span>Delivery</span>
-              <span style={styles.free}>FREE</span>
-            </div>
-
-            <div style={styles.divider} />
-
-            <div style={styles.totalRow}>
-              <span>Total</span>
-
-              <strong style={styles.total}>
-                ₹{totalPrice}
-              </strong>
-            </div>
-
-            <button
-              onClick={handleCheckout}
-              style={styles.checkoutButton}
-            >
-              Proceed to Checkout
-            </button>
-
-            <Link
-              to="/products"
-              style={styles.continueLink}
-            >
-              ← Continue Shopping
-            </Link>
-          </div>
+            );
+          })}
         </div>
-      )}
+
+        {/* ORDER SUMMARY */}
+        <div
+          style={{
+            ...styles.summary,
+
+            ...(isMobile
+              ? styles.mobileSummary
+              : styles.desktopSummary),
+          }}
+        >
+          <h2 style={styles.summaryTitle}>
+            Order Summary
+          </h2>
+
+          <div style={styles.summaryRow}>
+            <span>Items</span>
+            <span>{totalItems}</span>
+          </div>
+
+          <div style={styles.summaryRow}>
+            <span>Subtotal</span>
+            <span>₹{totalPrice}</span>
+          </div>
+
+          <div style={styles.summaryRow}>
+            <span>Delivery</span>
+
+            <span style={styles.free}>
+              FREE
+            </span>
+          </div>
+
+          <div style={styles.divider} />
+
+          <div style={styles.totalRow}>
+            <span>Total</span>
+
+            <strong style={styles.total}>
+              ₹{totalPrice}
+            </strong>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCheckout}
+            style={styles.checkoutButton}
+          >
+            Proceed to Checkout
+          </button>
+
+          <Link
+            to="/products"
+            style={styles.continueLink}
+          >
+            ← Continue Shopping
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
@@ -314,7 +360,7 @@ const styles = {
   },
 
   subtitle: {
-    margin: "0",
+    margin: 0,
     color: "#64748b",
     fontSize: "15px",
   },
@@ -323,46 +369,53 @@ const styles = {
     width: "100%",
     maxWidth: "1200px",
     margin: "0 auto",
+    boxSizing: "border-box",
+  },
+
+  desktopContainer: {
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 350px",
+    gridTemplateColumns:
+      "minmax(0, 1fr) 350px",
     gap: "25px",
     alignItems: "start",
   },
 
-  /* MOBILE CONTAINER */
   mobileContainer: {
     display: "flex",
     flexDirection: "column",
+    gap: "20px",
     width: "100%",
-    gap: "18px",
   },
 
   itemsSection: {
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
-    minWidth: "0",
-    width: "100%",
+    gap: "16px",
   },
 
   cartItem: {
     width: "100%",
     background: "#ffffff",
     borderRadius: "16px",
-    padding: "18px",
+    boxShadow:
+      "0 8px 25px rgba(15, 23, 42, 0.07)",
+    boxSizing: "border-box",
+    overflow: "hidden",
+  },
+
+  desktopCartItem: {
     display: "grid",
     gridTemplateColumns:
       "130px minmax(0, 1fr) auto",
     gap: "20px",
     alignItems: "center",
-    boxShadow:
-      "0 8px 25px rgba(15, 23, 42, 0.07)",
-    boxSizing: "border-box",
+    padding: "18px",
   },
 
-  /* MOBILE CART ITEM */
   mobileCartItem: {
-    gridTemplateColumns: "80px minmax(0, 1fr)",
+    display: "grid",
+    gridTemplateColumns:
+      "80px minmax(0, 1fr)",
     gap: "12px",
     padding: "12px",
     width: "100%",
@@ -374,11 +427,11 @@ const styles = {
     height: "130px",
     background: "#f1f5f9",
     borderRadius: "12px",
+    overflow: "hidden",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
-    flexShrink: "0",
+    flexShrink: 0,
   },
 
   mobileImageBox: {
@@ -390,12 +443,12 @@ const styles = {
     width: "100%",
     height: "100%",
     objectFit: "contain",
-    padding: "10px",
+    padding: "8px",
     boxSizing: "border-box",
   },
 
   productInfo: {
-    minWidth: "0",
+    minWidth: 0,
   },
 
   category: {
@@ -405,16 +458,15 @@ const styles = {
   },
 
   productName: {
+    margin: "7px 0",
     color: "#172033",
     fontSize: "19px",
-    margin: "7px 0",
-    lineHeight: "1.35",
+    lineHeight: "1.3",
+    wordBreak: "break-word",
   },
 
   mobileProductName: {
     fontSize: "16px",
-    lineHeight: "1.3",
-    wordBreak: "break-word",
     margin: "5px 0",
   },
 
@@ -428,7 +480,7 @@ const styles = {
   quantityRow: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
     flexWrap: "wrap",
   },
 
@@ -450,16 +502,14 @@ const styles = {
     height: "32px",
     border: "none",
     background: "#f8fafc",
-    color: "#172033",
     fontSize: "18px",
     cursor: "pointer",
   },
 
   quantity: {
-    minWidth: "35px",
+    minWidth: "34px",
     textAlign: "center",
     fontWeight: "600",
-    color: "#172033",
   },
 
   removeButton: {
@@ -469,7 +519,7 @@ const styles = {
     color: "#ef2929",
     fontSize: "13px",
     cursor: "pointer",
-    padding: "0",
+    padding: 0,
   },
 
   itemTotal: {
@@ -477,46 +527,45 @@ const styles = {
     fontSize: "18px",
     fontWeight: "700",
     whiteSpace: "nowrap",
-    alignSelf: "start",
-    paddingTop: "5px",
   },
 
-  /* MOBILE ITEM TOTAL */
   mobileItemTotal: {
     gridColumn: "1 / -1",
     width: "100%",
-    borderTop: "1px solid #e2e8f0",
+    borderTop:
+      "1px solid #e2e8f0",
     paddingTop: "10px",
     textAlign: "right",
     boxSizing: "border-box",
   },
 
   summary: {
-    width: "100%",
     background: "#ffffff",
     borderRadius: "16px",
     padding: "25px",
     boxShadow:
       "0 8px 25px rgba(15, 23, 42, 0.07)",
     boxSizing: "border-box",
+    width: "100%",
+  },
+
+  desktopSummary: {
     position: "sticky",
     top: "20px",
   },
 
-  /* IMPORTANT MOBILE FIX */
   mobileSummary: {
-    position: "static",
+    position: "relative",
+    order: 2,
     width: "100%",
-    margin: "0",
+    margin: 0,
     padding: "20px",
-    boxSizing: "border-box",
-    order: "2",
   },
 
   summaryTitle: {
     margin: "0 0 20px",
     color: "#172033",
-    fontSize: "22px",
+    fontSize: "23px",
   },
 
   summaryRow: {
@@ -543,9 +592,9 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: "20px",
     color: "#172033",
     fontSize: "18px",
-    marginBottom: "20px",
   },
 
   total: {
@@ -554,7 +603,7 @@ const styles = {
 
   checkoutButton: {
     width: "100%",
-    minHeight: "50px",
+    minHeight: "52px",
     border: "none",
     borderRadius: "10px",
     background:
@@ -569,7 +618,7 @@ const styles = {
   continueLink: {
     display: "block",
     textAlign: "center",
-    marginTop: "15px",
+    marginTop: "16px",
     color: "#2563eb",
     textDecoration: "none",
     fontSize: "14px",
